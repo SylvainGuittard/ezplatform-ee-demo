@@ -1,6 +1,9 @@
+imports:
+    - { resource: image_variations.yml }
+    - { resource: views.yml }
+
 ezpublish:
     # HttpCache settings, By default 'local' (Symfony HttpCache Proxy), by setting it to 'http' you can point it to Varnish
-    # You may also set it to 'fastly' if you want to use the fastly CDN
     http_cache:
         purge_type: '%purge_type%'
 
@@ -14,10 +17,18 @@ ezpublish:
 
     # Siteaccess configuration, with one siteaccess per default
     siteaccess:
-        list: [site, admin, fr, de, no]
+        list:
+            - site
+            - admin
+            - fr
+            - de
+            - no
         groups:
-            site_group: [site, fr, de, no]
-
+            site_group:
+                - site
+                - fr
+                - de
+                - no
             # WARNING: Do not remove or rename this group.
             # It's used to distinguish common siteaccesses from admin ones.
             # In case of multisite with multiple admin panels, remember to add any additional admin siteaccess to this group.
@@ -28,17 +39,6 @@ ezpublish:
 
     # System settings, grouped by siteaccess and/or siteaccess group
     system:
-        # System languages. Note that by default, content, content types, and other data are in eng-GB locale,
-        # so removing eng-GB from this list may lead to errors or content not being shown, unless you change
-        # all eng-GB data to other locales first.
-        site:
-            languages: [eng-GB, fre-FR, ger-DE, nor-NO]
-        fr:
-            languages: [fre-FR, eng-GB]
-        de:
-            languages: [ger-DE, eng-GB]
-        no:
-            languages: [nor-NO, eng-GB]
         site_group:
             # Cache pool service, needs to be different per repository (database) on multi repository install.
             cache_service_name: '%cache_pool%'
@@ -52,17 +52,20 @@ ezpublish:
                 default_ttl: '%httpcache_default_ttl%'
             # HttpCache purge server(s) setting, eg Varnish, for when ezpublish.http_cache.purge_type is set to 'http'.
             http_cache:
-                # If using fastly, 'purge_server' must be set to 'https://api.fastly.com'
                 purge_servers: ['%purge_server%']
                 fastly:
                     service_id: '%fastly_service_id%'
                     key: '%fastly_key%'
-
+            design: main
         # WARNING: Do not remove or rename this group.
         admin_group:
             cache_service_name: '%cache_pool%'
             var_dir: var/site
-            languages: [eng-GB]
+            languages:
+                - eng-GB
+                - fre-FR
+                - ger-DE
+                - nor-NO
             content:
                 default_ttl: '%httpcache_default_ttl%'
             http_cache:
@@ -70,3 +73,42 @@ ezpublish:
                 fastly:
                     service_id: '%fastly_service_id%'
                     key: '%fastly_key%'
+            design: main
+        site:
+            languages:
+                - eng-GB
+                - fre-FR
+                - ger-DE
+                - nor-NO
+        fr:
+            languages:
+                - fre-FR
+                - eng-GB
+        de:
+            languages:
+                - ger-DE
+                - eng-GB
+        no:
+            languages:
+                - nor-NO
+                - eng-GB
+
+ezdesign:
+    design_list:
+        main: [tastefulplanet]
+
+assetic:
+    assets:
+        css_default:
+            inputs:
+                - 'assets/css/tastefulplanet.css'
+                - 'assets/css/header.css'
+                - 'assets/css/footer.css'
+                - 'assets/css/home.css'
+                - 'assets/css/article.css'
+                - 'assets/css/folder.css'
+                - 'assets/css/place.css'
+                - 'assets/css/place_list.css'
+                - 'assets/css/blog.css'
+                - 'assets/css/blog_post.css'
+                - 'assets/css/subscribe.css'

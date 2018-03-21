@@ -37,14 +37,8 @@ parameters:
     # Cache DSN, see app/config/services/cache.yml for examples:
     cache_dsn: '%env(CACHE_DSN)%'
 
-    # Content types included in Recommendations from YooChoose account
-    ez_recommendation.default.recommender.included_content_types: [blog, article, place]
-
     # Settings for HttpCache
     purge_server: '%env(HTTPCACHE_PURGE_SERVER)%'
-
-    fastly_service_id: default_service_id
-    fastly_key: default_fastly_key
 
     # By default cache ttl is set to 24h, when using Varnish you can set a much higher value. High values depends on
     # using EzSystemsPlatformHttpCacheBundle (default as of v1.12) which by design expires affected cache on changes
@@ -71,6 +65,12 @@ parameters:
 
     env(HTTPCACHE_DEFAULT_TTL): 86400
 
+    # Settings for HttpCache
+    purge_server: '%env(HTTPCACHE_PURGE_SERVER)%'
+
+    fastly_service_id: default_service_id
+    fastly_key: default_fastly_key
+
 
     # Compile time handlers
     ## These are defined at compile time, and hence can't be set at runtime using env()
@@ -88,62 +88,21 @@ parameters:
     # Admin siteaccess group name
     admin_group_name: admin_group
 
-    # Location id of the content item for form uploads
-    form_builder.upload_folder.location_id: 76
+    # Top menu parameters
+    app.top_menu.parent_location_id: 2
+    app.top_menu.includedContentTypeIdentifier: ["folder", "article", "place_list", "blog", "about"]
 
-    # Application
+    # locationIds used for fetching items on home page
+    app.home.place_list_location_id: 219
+    app.home.tastes_location_id: 96
 
-    ## Footer
-    # Limit for latest content in footer.
-    app.footer.latest_content.limit: 7
-    # LocationId for footer content object.
-    app.footer.content_id: 58
-    # ContentType identifiers we want to have in "latest content" part of the footer.
-    app.footer.latest_content.content_types: [article]
-    # Number of blog_posts displayed per page in the blog view
-    app.blog.blog_post_list.limit: 10
-    # Number of article displayed per page in the folder view
-    app.folder.folder_list.limit: 8
-    # ContentType identifiers we want to exclude from content list in folder view
-    app.folder.folder_view.excluded_content_types: [image]
-    # ContentType identifiers we want to have in folder's tree
-    app.folder.folder_tree.included_content_types: [folder]
-    # Decide whether to show or hide article summary in the full view
-    app.article.full_view.show_summary: true
-    # Decide whether to show or hide article image in the full view
-    app.article.full_view.show_image: true
-    # Minimum distance in km for the places lookup
-    app.places.place_list.min: 0
-    # Maximum distance in km for the places lookup
-    app.places.place_list.max: 20000
+    # e-mail address used for form submission
+    app.contact_form.sender_email: no-reply@ez.no
 
-    # List of content types to be displayed in the place list
-    app.places.place_list.content_types: [place]
+    # e-mail address used as a message recipient
+    app.contact_form.recipient_email: no-reply@ez.no
 
-    ## Feedback Form
-    # Reminder: You can override these settings in config_dev.yml or config_prod.yml for debug or prod
-    # Email address to send contact form emails to
-    app.feedback_form.email_to: root@localhost
-    # Email address displayed as sent
-    app.feedback_form.email_from: noreply@appbundle.test
-
-    ## Search Page
-    # Number of results displayed per page in the simple search
-    app.search.list.limit: 10
-    app.search.list.content_types: ['article', 'place', 'blog_post', 'product']
-
-    #menu.default.menucontentsettings.topidentifierlist: [landing_page, blog, about, subscribe, product_list]
-    menu.default.menucontentsettings.topidentifierlist: [landing_page, folder, blog, about, subscribe, product_list]
-
-    # Location Ids of allowed user groups for viewing Articles with premium content
-    app.premium_content.allowed_user_groups.location_ids: [12, 13, 14]
-
-    # SEO default values
-    app.default.seo:
-        -
-          default_keywords: 'food, recipe, cuisine, drink, travel, voyage, world, country, magazine, blog'
-
-
-    eztags.default.tag_view.pagelayout: '::pagelayout.html.twig'
+    eztags.default.tag_view.pagelayout: '@@ezdesign/pagelayout.html.twig'
+    eztags.default.tag_view.template: '@@NetgenTags/tag/view.html.twig'
 
     userprofiling_block.public_dir: 'bundles/app'

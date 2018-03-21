@@ -6,53 +6,77 @@
 namespace AppBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
-use eZ\Bundle\EzPublishCoreBundle\Controller;
+use Symfony\Component\Templating\EngineInterface;
+use eZ\Publish\API\Repository\SearchService;
+use AppBundle\QueryType\MenuQueryType;
 
-class MenuController extends Controller
+class MenuController
 {
+    /** @var \Symfony\Bundle\TwigBundle\TwigEngine */
+    protected $templating;
+
+    /** @var \eZ\Publish\API\Repository\SearchService */
+    protected $searchService;
+
+    /** @var \AppBundle\QueryType\MenuQueryType */
+    protected $menuQueryType;
+
+    /** @var int */
+    protected $topMenuParentLocationId;
+
+    /** @var array */
+    protected $topMenuContentTypeIdentifier;
+
     /**
-     * Generates top menu.
+     * @param \Symfony\Component\Templating\EngineInterface $templating
+     * @param \eZ\Publish\API\Repository\SearchService $searchService
+     * @param \AppBundle\QueryType\MenuQueryType $menuQueryType
+     * @param int $topMenuParentLocationId
+     * @param array $topMenuContentTypeIdentifier
+     */
+    public function __construct(
+        EngineInterface $templating,
+        SearchService $searchService,
+        MenuQueryType $menuQueryType,
+        $topMenuParentLocationId,
+        $topMenuContentTypeIdentifier
+    ) {
+        $this->templating = $templating;
+        $this->searchService = $searchService;
+        $this->menuQueryType = $menuQueryType;
+        $this->topMenuParentLocationId = $topMenuParentLocationId;
+        $this->topMenuContentTypeIdentifier = $topMenuContentTypeIdentifier;
+    }
+
+    /**
+     * Renders top menu with child items.
      *
-     * @param mixed|null $currentLocationId
      * @param string $template
+     * @param string|null $pathString
      *
-     * @return Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function topMenuAction($currentLocationId, $template)
+    public function getChildNodesAction($template, $pathString = null)
     {
-        if ($currentLocationId !== null) {
-            $location = $this->getLocationService()->loadLocation($currentLocationId);
-            if (isset($location->path[2])) {
-                $secondLevelLocationId = $location->path[2];
-            }
+        $query = $this->menuQueryType->getQuery([
+            'parent_location_id' => $this->topMenuParentLocationId,
+            'included_content_type_identifier' => $this->topMenuContentTypeIdentifier,
+        ]);
+
+        $locationSearchResults = $this->searchService->findLocations($query);
+
+        $menuItems = [];
+        foreach ($locationSearchResults->searchHits as $hit) {
+            $menuItems[] = $hit->valueObject;
         }
 
-        $response = new Response();
+        $pathArray = $pathString ? explode("/", $pathString) : [];
 
-        $menu = $this->getMenu('top');
-        $parameters = ['menu' => $menu];
-        if (isset($secondLevelLocationId) && isset($menu[$secondLevelLocationId])) {
-            $parameters['submenu'] = $menu[$secondLevelLocationId];
-        }
-
-        return $this->render($template, $parameters, $response);
-    }
-
-    /**
-     * @param string $identifier
-     *
-     * @return \Knp\Menu\MenuItem
-     */
-    private function getMenu($identifier)
-    {
-        return $this->container->get("app.menu.$identifier");
-    }
-
-    /**
-     * @return \eZ\Publish\API\Repository\LocationService
-     */
-    private function getLocationService()
-    {
-        return $this->container->get('ezpublish.api.service.location');
+        return $this->templating->renderResponse(
+            $template, [
+            'menuItems' => $menuItems,
+            'pathArray' => $pathArray,
+        ], new Response()
+        );
     }
 }
